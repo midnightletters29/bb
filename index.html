@@ -1,0 +1,325 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Heart, Music, Lock, X, Play, SkipBack, SkipForward, Repeat, Shuffle } from 'lucide-react';
+
+// --- Components ---
+
+const PasscodeScreen = ({ onSuccess }: { onSuccess: () => void }) => {
+  const [input, setInput] = useState('');
+  const [error, setError] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (input === '0430') {
+      onSuccess();
+    } else {
+      setError(true);
+      setTimeout(() => setError(false), 500);
+      setInput('');
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-pink-50 flex flex-col items-center justify-center p-4">
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center"
+      >
+        <div className="mb-6 flex justify-center">
+          <div className="bg-pink-100 p-4 rounded-full">
+            <Lock className="w-8 h-8 text-pink-500" />
+          </div>
+        </div>
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">Enter Passcode</h2>
+        <p className="text-gray-500 mb-6">A special date for a special person</p>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <motion.input
+            animate={error ? { x: [-10, 10, -10, 10, 0] } : {}}
+            type="password"
+            maxLength={4}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            className="w-full text-center text-3xl tracking-[1em] font-bold border-b-2 border-pink-200 focus:border-pink-500 outline-none py-2 text-pink-600 placeholder-pink-200"
+            placeholder="••••"
+            autoFocus
+          />
+          <button
+            type="submit"
+            className="w-full bg-pink-500 text-white py-3 rounded-xl font-semibold hover:bg-pink-600 transition-colors shadow-lg shadow-pink-200"
+          >
+            Unlock My Heart
+          </button>
+        </form>
+      </motion.div>
+    </div>
+  );
+};
+
+const Envelope = ({ onOpen }: { onOpen: () => void }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleOpen = () => {
+    if (!isOpen) {
+      setIsOpen(true);
+      setTimeout(onOpen, 800); // Wait for flap animation
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-pink-50 flex items-center justify-center p-4 overflow-hidden">
+      <div className="relative cursor-pointer group" onClick={handleOpen}>
+        <motion.div
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          className="relative w-80 h-60 bg-pink-200 rounded-b-xl shadow-2xl flex items-center justify-center z-10"
+        >
+          {/* Envelope Flap */}
+          <motion.div
+            initial={{ rotateX: 0 }}
+            animate={{ rotateX: isOpen ? 180 : 0 }}
+            transition={{ duration: 0.6, ease: "easeInOut" }}
+            style={{ transformOrigin: "top" }}
+            className="absolute top-0 left-0 w-full h-full z-20"
+          >
+            <div className="w-0 h-0 border-l-[160px] border-l-transparent border-r-[160px] border-r-transparent border-t-[140px] border-t-pink-300 absolute top-0 left-0 filter drop-shadow-md" />
+          </motion.div>
+
+          {/* Envelope Body (Front) */}
+          <div className="absolute bottom-0 left-0 w-full h-full z-30 pointer-events-none">
+             <div className="w-0 h-0 border-l-[160px] border-l-pink-400 border-b-[120px] border-b-transparent border-t-[120px] border-t-transparent absolute bottom-0 left-0" />
+             <div className="w-0 h-0 border-r-[160px] border-r-pink-400 border-b-[120px] border-b-transparent border-t-[120px] border-t-transparent absolute bottom-0 right-0" />
+             <div className="w-0 h-0 border-l-[160px] border-l-transparent border-r-[160px] border-r-transparent border-b-[140px] border-b-pink-300 absolute bottom-0 left-0" />
+          </div>
+
+          {/* Letter inside Envelope */}
+          <motion.div
+            animate={{ y: isOpen ? -100 : 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="absolute w-72 h-48 bg-white rounded-lg shadow-sm z-10 flex items-center justify-center p-4 text-center"
+          >
+            <div>
+              <h3 className="text-xl font-semibold text-pink-600 mb-2">My Valentine</h3>
+              <p className="text-gray-700 font-serif">💌 Tap to read your love letter! 💌</p>
+            </div>
+          </motion.div>
+
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-40 text-white font-bold text-lg opacity-80 group-hover:scale-110 transition-transform">
+            {!isOpen && "Tap to Open"}
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
+const Letter = ({ onClose }: { onClose: () => void }) => {
+  return (
+    <motion.div
+      initial={{ scale: 0.8, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      exit={{ scale: 0.8, opacity: 0 }}
+      className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+    >
+      <div className="bg-white p-8 rounded-lg shadow-2xl max-w-lg w-full relative max-h-[90vh] overflow-y-auto">
+        <button 
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+        >
+          <X className="w-6 h-6" />
+        </button>
+        
+        <div className="text-center mb-6">
+          <Heart className="w-12 h-12 text-red-500 mx-auto mb-4 fill-red-500 animate-pulse" />
+          <h2 className="text-3xl font-serif text-gray-800">My Dearest Valentine</h2>
+        </div>
+        
+        <div className="space-y-4 text-gray-600 font-serif leading-relaxed text-lg">
+          <p>
+            From the moment you walked into my life, everything became brighter. 
+            You are the melody to my song, the sun to my day, and the beat to my heart.
+          </p>
+          <p>
+            Every moment with you is a treasure I hold dear. Your smile is my favorite 
+            sight, and your laughter is my favorite sound.
+          </p>
+          <p>
+            I wanted to do something special to show you just how much you mean to me. 
+            You deserve all the flowers, all the love, and all the happiness in the world.
+          </p>
+          <p className="font-bold text-pink-600 mt-8 text-center">
+            Will you be my Valentine?
+          </p>
+        </div>
+
+        <div className="mt-8 text-center">
+          <button
+            onClick={onClose}
+            className="bg-red-500 text-white px-8 py-3 rounded-full font-semibold hover:bg-red-600 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+          >
+            Close & See Surprise
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+const SpotifyCard = ({ imageUrl }: { imageUrl?: string }) => {
+  return (
+    <motion.div
+      initial={{ y: 50, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ delay: 0.5, duration: 0.8 }}
+      className="bg-gradient-to-b from-gray-900 to-black p-6 rounded-xl shadow-2xl max-w-sm w-full mx-auto text-white border border-gray-800"
+    >
+      <div className="mb-6 relative group">
+        <div className="w-full aspect-square bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg shadow-lg flex items-center justify-center overflow-hidden">
+           {imageUrl ? <img src={imageUrl} alt="Spotify Cover" className="w-32 h-32 rounded-lg" /> : <Music className="w-32 h-32 text-white opacity-80" />}
+           <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors" />
+        </div>
+      </div>
+
+      <div className="flex justify-between items-end mb-4">
+        <div>
+          <h3 className="text-2xl font-bold mb-1">Into You</h3>
+          <p className="text-gray-400">Ariana Grande</p>
+        </div>
+        <Heart className="w-6 h-6 text-green-500 fill-green-500" />
+      </div>
+
+      <div className="mb-6">
+        <div className="w-full bg-gray-700 h-1 rounded-full mb-2">
+          <div className="w-2/3 bg-white h-full rounded-full relative">
+            <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow" />
+          </div>
+        </div>
+        <div className="flex justify-between text-xs text-gray-400">
+          <span>2:45</span>
+          <span>4:04</span>
+        </div>
+      </div>
+
+      <div className="flex justify-between items-center px-4">
+        <Shuffle className="w-5 h-5 text-green-500" />
+        <SkipBack className="w-6 h-6 text-white" />
+        <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center text-black hover:scale-105 transition-transform cursor-pointer">
+          <Play className="w-6 h-6 fill-black ml-1" />
+        </div>
+        <SkipForward className="w-6 h-6 text-white" />
+        <Repeat className="w-5 h-5 text-green-500" />
+      </div>
+    </motion.div>
+  );
+};
+
+const SurpriseParty = () => {
+  const [particles, setParticles] = useState<{id: number, x: number, y: number, color: string}[]>([]);
+
+  useEffect(() => {
+    const colors = ['#FF69B4', '#FF1493', '#FFD700', '#FF4500', '#00FF7F'];
+    const newParticles = Array.from({ length: 50 }).map((_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: -10 - Math.random() * 50,
+      color: colors[Math.floor(Math.random() * colors.length)]
+    }));
+    setParticles(newParticles);
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-pink-100 to-purple-200 flex flex-col items-center justify-center p-4 overflow-hidden relative">
+      {particles.map((p) => (
+        <motion.div
+          key={p.id}
+          initial={{ y: p.y, x: `${p.x}vw` }}
+          animate={{ y: '110vh', rotate: 360 }}
+          transition={{ 
+            duration: 3 + Math.random() * 2, 
+            repeat: Infinity, 
+            ease: "linear",
+            delay: Math.random() * 2 
+          }}
+          className="absolute w-3 h-3 rounded-full z-0"
+          style={{ backgroundColor: p.color }}
+        />
+      ))}
+
+      <div className="z-10 w-full max-w-md space-y-8 text-center">
+        <motion.div
+          initial={{ scale: 0, rotate: -180 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: "spring", bounce: 0.5 }}
+        >
+          <h1 className="text-4xl md:text-5xl font-bold text-pink-600 mb-4 drop-shadow-sm">
+            Happy Valentine's Day!
+          </h1>
+          <div className="text-6xl mb-8 animate-bounce">
+            💐 🌸 🌹 🌺
+          </div>
+        </motion.div>
+
+        <SpotifyCard imageUrl="https://raw.githubusercontent.com/yourusername/valentine-surprise/main/spotify-cover.png" />
+      </div>
+    </div>
+  );
+};
+
+// --- Main App Component ---
+
+function App() {
+  const [stage, setStage] = useState<'PASSCODE' | 'ENVELOPE' | 'LETTER' | 'SURPRISE'>('PASSCODE');
+
+  return (
+    <div className="font-sans text-gray-900">
+      <AnimatePresence mode="wait">
+        {stage === 'PASSCODE' && (
+          <motion.div
+            key="passcode"
+            exit={{ opacity: 0, y: -20 }}
+            className="absolute inset-0"
+          >
+            <PasscodeScreen onSuccess={() => setStage('ENVELOPE')} />
+          </motion.div>
+        )}
+
+        {stage === 'ENVELOPE' && (
+          <motion.div
+            key="envelope"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0"
+          >
+            <Envelope onOpen={() => setStage('LETTER')} />
+          </motion.div>
+        )}
+
+        {stage === 'LETTER' && (
+          <motion.div
+            key="letter"
+            className="absolute inset-0"
+          >
+            <Envelope onOpen={() => {}} />
+            <Letter onClose={() => setStage('SURPRISE')} />
+          </motion.div>
+        )}
+
+        {stage === 'SURPRISE' && (
+          <motion.div
+            key="surprise"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute inset-0"
+          >
+            <SurpriseParty />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+export default App;
